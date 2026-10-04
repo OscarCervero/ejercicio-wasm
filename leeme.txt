@@ -1,11 +1,25 @@
-
-
+Este proyecto implementa y compara el rendimiento de la función recursiva de
+Takeuchi (tak) desarrollada en WebAssembly nativo (escrito a mano en formato de
+texto WAT y compilado a binario WASM) frente a su equivalente implementado en
+JavaScript puro.
+La función de takeuchi tiene una triple llamada recursiva, por eso la he elegido para la realización de este ejercicio.
 
 
 Archivos del proyecto:
 
 takeuchi.css  : Hoja de estilos para la aplicación
-takeuchi.html : 
-takeuchi.js   : 
-takeuchi.wasm : 
-takeuchi.wat  : 
+takeuchi.html : Interfaz de la aplicación que permite elegir los parámetros de la función
+takeuchi.js   : Módulo JavaScript encargado de cargar e instanciar el binario WASM, definir la implementación nativa en JavaScript de la función de Takeuchi y exportar ambas para su medición.
+takeuchi.wasm : Binario ejecutable WebAssembly compilado directamente a partir del archivo takeuchi.wat (mediante wat2wasm)
+takeuchi.wat  : Código fuente en formato texto de WebAssembly escrito de forma nativa
+
+
+
+Se emplea la API performance.now() para capturar el tiempo transcurrido en milisegundos con alta resolución.
+Se ejecutan ambas funciones bajo las mismas condiciones y parámetros numéricos, mostrando si WebAssembly o JavaScript tarda menos.
+
+Las ventajas de WebAssembly frente a JavaScript se deben a:
+Que en WebAssembly, los parámetros y operaciones aritméticas operan directamente como enteros con signo de 32 bits a nivel de hardware, eliminando la sobrecarga de comprobación dinámica de tipos que requiere el motor de JavaScript.
+Mínimo overhead en la pila de llamadas comparado con la llamada recursiva en los motores V8/SpiderMonkey de JavaScript.
+También WebAssembly gana velocidad por la ausencia de optimización JIT impredecible y recolector de basura.
+El archivo takeuchi.wasm ocupa apenas unas decenas de bytes, minimizando la latencia de transferencia.
