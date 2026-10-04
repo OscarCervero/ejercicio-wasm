@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>Benchmark Takeuchi WASM vs JS</title>
+    <link rel="stylesheet" href="takeuchi.css">
+</head>
+<body>
+    <h1>Benchmark Recursivo: Función de Takeuchi</h1>
+    <p>Compara llamadas recursivas profundas entre WebAssembly y JavaScript.</p>
+
+    <section>
+        <h2>Parámetros del benchmark</h2>
+        <label>X: <input type="number" value="12"></label>
+        <label>Y: <input type="number" value="8"></label>
+        <label>Z: <input type="number" value="0"></label>
+        <button type="button">Iniciar Prueba</button>
+
+        <h3>Resultados:</h3>
+        <p>WASM: sin ejecutar</p>
+        <p>JS: sin ejecutar</p>
+        <p></p>
+    </section>
+
+    <section>
+        <h2>Lectura de takeuchi.wat</h2>
+        <pre>Cargando...</pre>
+    </section>
+
+    <script type="module">
+        import { takWasm, takJS } from './takeuchi.js';
+
+        const formSection = document.querySelector('section:first-of-type');
+        const inputs = formSection.querySelectorAll('input[type="number"]');
+        const btn = formSection.querySelector('button');
+        const resultParagraphs = formSection.querySelectorAll('p');
+        
+        const resWasm = resultParagraphs[0];
+        const resJS = resultParagraphs[1];
+        const comp = resultParagraphs[2];
+
+        // Ahora seleccionamos directamente la etiqueta pre
+        const watPre = document.querySelector('pre');
+
+        btn.addEventListener('click', async () => {
+            const x = parseInt(inputs[0].value, 10);
+            const y = parseInt(inputs[1].value, 10);
+            const z = parseInt(inputs[2].value, 10);
+
+            btn.disabled = true;
+            resWasm.textContent = 'Calculando WASM...';
+            resJS.textContent = 'En cola...';
+            comp.textContent = '';
+
+            await new Promise(resolve => setTimeout(resolve, 50));
+
+            try {
+                // Medir WASM
+                const t0Wasm = performance.now();
+                const rWasm = await takWasm(x, y, z);
+                const t1Wasm = performance.now();
+                const timeWasm = (t1Wasm - t0Wasm).toFixed(2);
+                resWasm.textContent = `WASM: tak(${x}, ${y}, ${z}) = ${rWasm} en ${timeWasm} ms`;
+
+                resJS.textContent = 'Calculando JS...';
+                await new Promise(resolve => setTimeout(resolve, 50));
+
+                // Medir JS
+                const t0JS = performance.now();
+                const rJS = takJS(x, y, z);
+                const t1JS = performance.now();
+                const timeJS = (t1JS - t0JS).toFixed(2);
+                resJS.textContent = `JS: tak(${x}, ${y}, ${z}) = ${rJS} en ${timeJS} ms`;
+
+                // Conclusión
+                if (parseFloat(timeWasm) > 0) {
+                    const factor = (timeJS / timeWasm).toFixed(2);
+                    comp.textContent = `WebAssembly fue ${factor}x más rápido.`;
+                } else {
+                    comp.textContent = 'WebAssembly tardó 0 ms. Sube un poco los números para notar más tiempo.';
+                }
+
+            } catch (err) {
+                console.error(err);
+                comp.textContent = "Error: " + err.message;
+            } finally {
+                btn.disabled = false;
+            }
+        });
+
+        // Cargar texto del .wat en pantalla
+        (async () => {
+            try {
+                const resp = await fetch('./takeuchi.wat');
+                const txt = await resp.text();
+                watPre.textContent = txt;
+            } catch (e) {
+                watPre.textContent = 'Error al cargar .wat: ' + e;
+            }
+        })();
+    </script>
+</body>
+</html>

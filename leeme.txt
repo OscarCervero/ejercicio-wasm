@@ -1,0 +1,11 @@
+
+
+
+
+Archivos del proyecto:
+
+takeuchi.css  : Hoja de estilos para la aplicación
+takeuchi.html : 
+takeuchi.js   : 
+takeuchi.wasm : 
+takeuchi.wat  : 
